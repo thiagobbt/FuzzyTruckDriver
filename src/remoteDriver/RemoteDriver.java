@@ -9,7 +9,7 @@ import java.net.UnknownHostException;
 import java.util.StringTokenizer;
 
 import net.sourceforge.jFuzzyLogic.FIS;
-import net.sourceforge.jFuzzyLogic.plot.JFuzzyChart;
+import net.sourceforge.jFuzzyLogic.rule.Rule;
 import net.sourceforge.jFuzzyLogic.rule.Variable;
  
 public class RemoteDriver {
@@ -46,7 +46,6 @@ public class RemoteDriver {
         double x, y;
         double angle;
         
-        // requisicao da posicao do caminhao
         out.println("r");
         while ((fromServer = in.readLine()) != null) {
         	StringTokenizer st = new StringTokenizer(fromServer);
@@ -82,6 +81,8 @@ public class RemoteDriver {
         	// double respostaDaSuaLogica = teste; // atribuir um valor entre -1 e 1 para virar o volante pra esquerda ou direita.
         	double respostaDaSuaLogica = tip.defuzzify();
         	System.out.println("Sending: " + respostaDaSuaLogica);
+        	for( Rule r : fis.getFunctionBlock("driver").getFuzzyRuleBlock("No1").getRules() )
+        	      System.out.println(r);
         	
         	///////////////////////////////////////////////////////////////////////////////// Acaba sua modificacao aqui
         	// envio da acao do volante
