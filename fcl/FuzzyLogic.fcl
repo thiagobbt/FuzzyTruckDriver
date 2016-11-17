@@ -1,0 +1,121 @@
+FUNCTION_BLOCK driver
+
+VAR_INPUT
+	x : REAL;
+	y : REAL;
+	angle : REAL;
+END_VAR
+
+VAR_OUTPUT
+	out_angle : REAL;
+END_VAR
+
+FUZZIFY x
+	TERM ML := TRIAN -0.5 0.0 0.3;
+	TERM L  := TRIAN 0.26 0.35 0.46;
+	TERM C  := TRIAN 0.36 0.5 0.64;
+  	TERM R  := TRIAN 0.56 0.65 0.74;
+  	TERM MR := TRIAN 0.7 1 1.5;
+END_FUZZIFY
+
+FUZZIFY y
+	TERM MT := TRIAN -1 0 0.4; 
+	TERM C  := TRIAN 0.35 0.5 0.65;
+	TERM MB := TRIAN 0.6 1 2;
+END_FUZZIFY
+
+FUZZIFY angle
+	TERM high 		:= TRIAN 	205 270 335;  
+	TERM left 		:= (-10, 1) (35, 0) (295, 0) (350, 1) (395, 0);
+	TERM low_left  	:= TRIAN	15	50	85; 
+	TERM low 		:= TRIAN	65	90	115; 
+	TERM low_right  := TRIAN 	95	130	165;
+	TERM right  	:= TRIAN 	145	190	255;
+END_FUZZIFY
+
+DEFUZZIFY out_angle
+	TERM right := TRIAN -2 -1 -0.14;
+	TERM keep  := TRIAN -0.15 0 0.15;
+	TERM left  := TRIAN 0.14 1 2;
+	METHOD : COA;
+	DEFAULT := 0;
+END_DEFUZZIFY
+
+RULEBLOCK No1
+	AND : MIN;
+	ACT : MIN;
+	ACCU : MAX;
+	
+
+	RULE 6 : IF x IS C AND angle IS low THEN out_angle IS keep;
+	RULE 7 : IF x IS C AND angle IS high THEN out_angle IS right;
+	RULE 8 : IF x IS C AND (angle IS low_left OR angle IS left)THEN out_angle IS left;
+	RULE 9 : IF x IS C AND (angle IS low_right OR angle IS right) THEN out_angle IS right;
+
+	//===========================================================================================================
+
+	RULE 1 : IF y IS MT AND (x IS ML OR x IS L) AND (angle IS high OR angle IS left) THEN out_angle IS right;
+	RULE 2 : IF y IS MT AND (x IS ML OR x IS L) AND angle IS right THEN out_angle IS right;
+	RULE 3 : IF y IS MT AND (x IS ML OR x IS L) AND angle IS low_right THEN out_angle IS keep;
+	RULE 4 : IF y IS MT AND (x IS ML OR x IS L) AND angle IS low THEN out_angle IS left;
+	RULE 5 : IF y IS MT AND (x IS ML OR x IS L) AND angle IS low_left THEN out_angle IS right;
+
+	RULE 10 : IF y IS MT AND (x IS MR OR x IS R) AND (angle IS high OR angle IS right) THEN out_angle IS left;
+	RULE 11 : IF y IS MT AND (x IS MR OR x IS R) AND angle IS left THEN out_angle IS left;
+	RULE 12 : IF y IS MT AND (x IS MR OR x IS R) AND angle IS low_left THEN out_angle IS keep;
+	RULE 13 : IF y IS MT AND (x IS MR OR x IS R) AND angle IS low THEN out_angle IS right;
+	RULE 14 : IF y IS MT AND (x IS MR OR x IS R) AND angle IS low_right THEN out_angle IS right;
+
+
+	//===========================================================================================================
+	RULE 15 : IF y IS C AND x IS ML AND (angle IS high OR angle IS left) THEN out_angle IS right;
+	RULE 16 : IF y IS C AND x IS ML AND angle IS right THEN out_angle IS keep;
+	RULE 17 : IF y IS C AND x IS ML AND angle IS low_right THEN out_angle IS keep;
+	RULE 18 : IF y IS C AND x IS ML AND angle IS low THEN out_angle IS left;
+	RULE 19 : IF y IS C AND x IS ML AND angle IS low_left THEN out_angle IS left;
+
+	RULE 15 : IF y IS C AND x IS L AND (angle IS high OR angle IS left) THEN out_angle IS right;
+	RULE 16 : IF y IS C AND x IS L AND angle IS right THEN out_angle IS keep;
+	RULE 17 : IF y IS C AND x IS L AND angle IS low_right THEN out_angle IS keep;
+	RULE 18 : IF y IS C AND x IS L AND angle IS low THEN out_angle IS left;
+	RULE 19 : IF y IS C AND x IS L AND angle IS low_left THEN out_angle IS left;
+
+	RULE 24 : IF y IS C AND x IS R AND (angle IS high OR angle IS right) THEN out_angle IS left;
+	RULE 25 : IF y IS C AND x IS R AND angle IS left THEN out_angle IS keep;
+	RULE 26 : IF y IS C AND x IS R AND angle IS low_left THEN out_angle IS keep;
+	RULE 27 : IF y IS C AND x IS R AND angle IS low THEN out_angle IS right;
+	RULE 28 : IF y IS C AND x IS R AND angle IS low_right THEN out_angle IS right;
+
+	RULE 24 : IF y IS C AND x IS MR AND (angle IS high OR angle IS right) THEN out_angle IS left;
+	RULE 25 : IF y IS C AND x IS MR AND angle IS left THEN out_angle IS keep;
+	RULE 26 : IF y IS C AND x IS MR AND angle IS low_left THEN out_angle IS keep;
+	RULE 27 : IF y IS C AND x IS MR AND angle IS low THEN out_angle IS right;
+	RULE 28 : IF y IS C AND x IS MR AND angle IS low_right THEN out_angle IS right;
+
+	//===========================================================================================================
+	RULE 29 : IF y IS MB AND x IS ML AND angle IS high THEN out_angle IS right;
+	RULE 30 : IF y IS MB AND x IS ML AND angle IS right THEN out_angle IS keep;
+	RULE 31 : IF y IS MB AND x IS ML AND angle IS low_right THEN out_angle IS left;
+	RULE 32 : IF y IS MB AND x IS ML AND angle IS low THEN out_angle IS left;
+	RULE 33 : IF y IS MB AND x IS ML AND (angle IS low_left OR angle IS left) THEN out_angle IS right;
+
+	RULE 29 : IF y IS MB AND x IS L AND angle IS high THEN out_angle IS right;
+	RULE 30 : IF y IS MB AND x IS L AND angle IS right THEN out_angle IS keep;
+	RULE 31 : IF y IS MB AND x IS L AND angle IS low_right THEN out_angle IS left;
+	RULE 32 : IF y IS MB AND x IS L AND angle IS low THEN out_angle IS left;
+	RULE 33 : IF y IS MB AND x IS L AND (angle IS low_left OR angle IS left) THEN out_angle IS right;
+		
+	RULE 38 : IF y IS MB AND x IS R AND angle IS high THEN out_angle IS left;
+	RULE 39 : IF y IS MB AND x IS R AND angle IS left THEN out_angle IS keep;
+	RULE 40 : IF y IS MB AND x IS R AND angle IS low_left THEN out_angle IS right;
+	RULE 41 : IF y IS MB AND x IS R AND angle IS low THEN out_angle IS right;
+	RULE 42 : IF y IS MB AND x IS R AND (angle IS low_right OR angle IS right) THEN out_angle IS left;
+
+	RULE 38 : IF y IS MB AND x IS MR AND angle IS high THEN out_angle IS left;
+	RULE 39 : IF y IS MB AND x IS MR AND angle IS left THEN out_angle IS keep;
+	RULE 40 : IF y IS MB AND x IS MR AND angle IS low_left THEN out_angle IS right;
+	RULE 41 : IF y IS MB AND x IS MR AND angle IS low THEN out_angle IS right;
+	RULE 42 : IF y IS MB AND x IS MR AND (angle IS low_right OR angle IS right) THEN out_angle IS left;
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK

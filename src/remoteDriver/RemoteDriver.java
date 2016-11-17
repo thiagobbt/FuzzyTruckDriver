@@ -53,9 +53,10 @@ public class RemoteDriver {
         	y = Double.valueOf(st.nextToken()).doubleValue();
         	angle = Double.valueOf(st.nextToken()).doubleValue();
 
+        	System.out.println();
         	System.out.println("x: " + x + " y: " + y + " angle: " + angle);
 
-        	String fileName = "fcl/test.fcl";
+        	String fileName = "fcl/FuzzyLogic.fcl";
             FIS fis = FIS.load(fileName,true);
             
             // Error while loading?
@@ -72,23 +73,25 @@ public class RemoteDriver {
             // Evaluate
             fis.evaluate();
 
+            Variable out_angle = fis.getVariable("out_angle");
+            
             // Show output variable's chart
-            Variable tip = fis.getVariable("out_angle");
             // JFuzzyChart.get().chart(tip, tip.getDefuzzifier(), true);
         	
 			
-        	// double teste = Double.valueOf(stdIn.readLine());
-        	// double respostaDaSuaLogica = teste; // atribuir um valor entre -1 e 1 para virar o volante pra esquerda ou direita.
-        	double respostaDaSuaLogica = tip.defuzzify();
-        	System.out.println("Sending: " + respostaDaSuaLogica);
-        	for( Rule r : fis.getFunctionBlock("driver").getFuzzyRuleBlock("No1").getRules() )
-        	      System.out.println(r);
+        	double truckResponse = out_angle.defuzzify();
+        	System.out.println("Sending: " + truckResponse);
         	
-        	///////////////////////////////////////////////////////////////////////////////// Acaba sua modificacao aqui
-        	// envio da acao do volante
-        	out.println(respostaDaSuaLogica);
+        	for(Rule r : fis.getFunctionBlock("driver").getFuzzyRuleBlock("No1").getRules()) {
+        		if (r.getDegreeOfSupport() > 0) {
+        			System.out.println(r);
+        		}
+        	}
         	
-            // requisicao da posicao do caminhao        	
+        	// Send wheel action
+        	out.println(truckResponse);
+        	
+            // Request truck position
         	out.println("r");	
         }
  
